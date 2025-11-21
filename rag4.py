@@ -13,6 +13,12 @@ from langchain.agents import initialize_agent, AgentType
 import requests
 import io
 import sys
+from googlesearch import search
+from langchain.agents import Tool
+from langchain.utilities import DuckDuckGoSearchAPIWrapper
+from langchain.tools import DuckDuckGoSearchResults
+
+
 
 st.set_page_config(page_title="Multi-Agent", layout="wide")
 
@@ -38,7 +44,7 @@ embedding_model = OpenAIEmbeddings(
    http_client=client
    ) 
 
-pdf_path=""
+pdf_path=" "
 if uploaded_file is not None:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
         tmp_file.write(uploaded_file.read())
@@ -90,58 +96,64 @@ def rag_tool_func(question: str) -> str:
 rag_tool = Tool(
         name="PDF_RAG_QA",
         func=rag_tool_func,
-        description="You must answer the questions **only using the content of the provided PDF. "
+        description="You must answer the questions only using the content of the provided PDF. "
                     "If the answer is not present in the PDF, respond with: The answer is not available in the document."
                     "Do not provide information from outside sources."
     )
 
-def web_search_tool(query: str) -> str:
-    url = "https://api.duckduckgo.com/"
-    params = {
-        "q": query,
-        "format": "json",
-        "no_html": 1,
-        "skip_disambig": 1
-        }
-    
-    response = requests.get(url, params=params)
-    data = response.json()
-    
-    results = []
 
-    if data.get("AbstractText"):
-        results.append({
-                "title": data.get("Heading", ""),
-            "link": data.get("AbstractURL", ""),
-            "snippet": data.get("AbstractText", "")
-            })
-    
-    # Also include related topics (like quick answers)
-    for topic in data.get("RelatedTopics", []):
-        if "Text" in topic and "FirstURL" in topic:
-            results.append({
-                "title": topic.get("Text"),
-                "link": topic.get("FirstURL"),
-                "snippet": topic.get("Text")
-            })
-    
-    return results[:5]  # Return top 5 results
+# duck_search = DuckDuckGoSearchResults()
+# from googlesearch import search
+
+# for url in search("latest AI news", num_results=5):
+#     print(url)
 
 
-web_search_tool_obj = Tool(
-        name="WebSearch",
-        func=web_search_tool,
-        description="Use this tool to get the latest information from the web."
-    
-    )
+# web_search_tool_obj = Tool(
+#     name="WebSearch",
+#     func=duck_search.run,
+#     description="Use this tool to get the latest information from the web."
+# )
+# print(duck_search.run("latest AI news"))
 
-tools=[rag_tool,web_search_tool_obj]
+
+def google_search_tool(query: str) -> str:
+    """
+    Perform a Google search and return top 5 results as a string.
+    """
+    try:
+        results = list(search(query, num_results=5))
+        if results:
+            return "\n".join(results)
+        else:
+            return "No results found."
+    except Exception as e:
+        return f"Error during search: {e}"
+
+
+google_search_tool_obj = Tool(
+    name="GoogleSearch",
+    func=google_search_tool,
+    description="Use this tool to search the web using Google. Return the top URLs. No API key required."
+)
+# web_search_tool_obj = Tool(
+#         name="WebSearch",
+#         func=web_search_tool,
+#         description="Use this tool to get the latest information from the web."
+    
+#     )
+
+# tools=[rag_tool,web_search_tool_obj]
+
+tools=[rag_tool,google_search_tool_obj]
+
 
 supervisor_agent = initialize_agent(
         tools=tools,      
         llm=llm,               
         agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-        verbose=True
+        verbose=True,
+        handle_parsing_errors=True
     )
 
 user_query = st.text_input("Ask anything about the PDF:")
@@ -159,7 +171,7 @@ if st.button("Ask"):
         buffer = io.StringIO()
         sys.stdout = buffer  # Redirect stdout to capture verbose tool calls
 
-        answer = supervisor_agent.run(user_query)
+        answer = supervisor_agent.invoke(user_query)
 
         sys.stdout = sys.__stdout__  # Reset stdout
         log = buffer.getvalue()
