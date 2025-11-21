@@ -44,12 +44,11 @@ embedding_model = OpenAIEmbeddings(
    http_client=client
    ) 
 
-pdf_path=" "
-if uploaded_file is not None:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-        tmp_file.write(uploaded_file.read())
-        pdf_path = tmp_file.name
-    st.success(f"Uploaded: {uploaded_file.name}")
+
+with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+    tmp_file.write(uploaded_file.read())
+    pdf_path = tmp_file.name
+st.success(f"Uploaded: {uploaded_file.name}")
 
 loader = PyPDFLoader(pdf_path)
 docs = loader.load()
@@ -90,15 +89,14 @@ rag_chain = RetrievalQA.from_chain_type(
     )
 
 def rag_tool_func(question: str) -> str:
-    result = rag_chain.invoke({"query": user_query})
+    result = rag_chain.invoke({"query": question})
     return result["result"]
 
 rag_tool = Tool(
         name="PDF_RAG_QA",
         func=rag_tool_func,
-        description="You must answer the questions only using the content of the provided PDF. "
-                    "If the answer is not present in the PDF, respond with: The answer is not available in the document."
-                    "Do not provide information from outside sources."
+        description="Use this tool ONLY when the question is clearly about the content of the PDF. "
+                    "Do NOT use this tool for general knowledge or questions unrelated to the PDF."
     )
 
 
@@ -134,7 +132,8 @@ def google_search_tool(query: str) -> str:
 google_search_tool_obj = Tool(
     name="GoogleSearch",
     func=google_search_tool,
-    description="Use this tool to search the web using Google. Return the top URLs. No API key required."
+    description="Use this tool when the answer cannot be found in the PDF or when the question"
+                "is about the real world, news, general knowledge, or anything outside the PDF."
 )
 # web_search_tool_obj = Tool(
 #         name="WebSearch",
@@ -151,40 +150,42 @@ tools=[rag_tool,google_search_tool_obj]
 supervisor_agent = initialize_agent(
         tools=tools,      
         llm=llm,               
-        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+        # agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+        agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
         verbose=True,
         handle_parsing_errors=True
     )
 
 user_query = st.text_input("Ask anything about the PDF:")
-
+answer = supervisor_agent.invoke(user_query)
+st.write(f"Answer: {answer}")
     # if user_question:
     #     response = supervisor_agent.run(user_question)
     #     st.subheader("Agent Answer:")
     #     st.write(response)
-if st.button("Ask"):
-    if user_query.strip() == "":
-        st.warning("Please enter a question!")
-    else:
-        # Capture verbose output
+# if st.button("Ask"):
+#     if user_query.strip() == "":
+#         st.warning("Please enter a question!")
+#     else:
+#         # Capture verbose output
 
-        buffer = io.StringIO()
-        sys.stdout = buffer  # Redirect stdout to capture verbose tool calls
+#         buffer = io.StringIO()
+#         sys.stdout = buffer  # Redirect stdout to capture verbose tool calls
 
-        answer = supervisor_agent.invoke(user_query)
+#         answer = supervisor_agent.invoke(user_query)
 
-        sys.stdout = sys.__stdout__  # Reset stdout
-        log = buffer.getvalue()
+#         sys.stdout = sys.__stdout__  # Reset stdout
+#         log = buffer.getvalue()
 
-        # Extract the tool used from the verbose log (approximate)
-        if "RAG" in log:
-            tool_used = "RAG"
-        elif "WebSearch" in log:
-            tool_used = "WebSearch"
-        else:
-            tool_used = "Unknown"
+#         # Extract the tool used from the verbose log (approximate)
+#         if "RAG" in log:
+#             tool_used = "RAG"
+#         elif "WebSearch" in log:
+#             tool_used = "WebSearch"
+#         else:
+#             tool_used = "Unknown"
 
-        st.success(f"Tool Used: {tool_used}")
-        st.write(f"Answer: {answer}")
-        st.text("Verbose log (for debugging):")
-        st.text(log)
+#         st.success(f"Tool Used: {tool_used}")
+#         st.write(f"Answer: {answer}")
+#         st.text("Verbose log (for debugging):")
+#         st.text(log)
