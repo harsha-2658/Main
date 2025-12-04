@@ -14,15 +14,15 @@ os.environ["TIKTOKEN_CACHE_DIR"]=tiktoken_cache_dir
 client = httpx.Client(verify=False) 
 # LLM and Embedding setup 
 llm = ChatOpenAI( 
-   base_url="https://genailab.tcs.in", 
-   model="azure_ai/genailab-maas-DeepSeek-V3-0324", 
-   api_key="sk-scLhBXHvk9qrq4SX6NFzdA", 
+   base_url="", 
+   model="", 
+   api_key="", 
    http_client=client 
 ) 
 embedding_model = OpenAIEmbeddings( 
-   base_url="https://genailab.tcs.in", 
-   model="azure/genailab-maas-text-embedding-3-large", 
-   api_key="sk-scLhBXHvk9qrq4SX6NFzdA", 
+   base_url="", 
+   model="", 
+   api_key="", 
    http_client=client) 
 
 st.set_page_config(page_title="RAG PDF Summarizer") 
@@ -57,5 +57,6 @@ if upload_file:
        result = rag_chain.invoke(summary_prompt) 
    st.subheader("     Summary") 
    st.write(result)
+
 
 
