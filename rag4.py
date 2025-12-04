@@ -31,17 +31,11 @@ os.environ["TIKTOKEN_CACHE_DIR"]=tiktoken_cache_dir
 client = httpx.Client(verify=False) 
 
 llm = ChatOpenAI( 
-   base_url="https://genailab.tcs.in", 
-   model="azure_ai/genailab-maas-DeepSeek-V3-0324", 
-   api_key="sk-scLhBXHvk9qrq4SX6NFzdA", 
-   http_client=client 
+   
 ) 
 
 embedding_model = OpenAIEmbeddings( 
-   base_url="https://genailab.tcs.in", 
-   model="azure/genailab-maas-text-embedding-3-large", 
-   api_key="sk-scLhBXHvk9qrq4SX6NFzdA", 
-   http_client=client
+   
    ) 
 
 
@@ -189,3 +183,4 @@ st.write(f"Answer: {answer}")
 #         st.write(f"Answer: {answer}")
 #         st.text("Verbose log (for debugging):")
 #         st.text(log)
+
