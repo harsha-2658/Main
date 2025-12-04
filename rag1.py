@@ -19,16 +19,16 @@
 # docs = loader.load()
 
 # llm = ChatOpenAI( 
-#    base_url="https://genailab.tcs.in", 
-#    model="azure_ai/genailab-maas-DeepSeek-V3-0324", 
-#    api_key="sk-scLhBXHvk9qrq4SX6NFzdA", 
+#    base_url="", 
+#    model="", 
+#    api_key="", 
 #    http_client=client 
 # ) 
 
 # embedding_model = OpenAIEmbeddings( 
-#    base_url="https://genailab.tcs.in", 
-#    model="azure/genailab-maas-text-embedding-3-large", 
-#    api_key="sk-scLhBXHvk9qrq4SX6NFzdA", 
+#    base_url="", 
+#    model="", 
+#    api_key="", 
 #    http_client=client) 
 
 # full_text = "\n".join([d.page_content for d in docs])
@@ -79,6 +79,7 @@
 #     print("\nSource Documents:")
 #     for doc in result["source_documents"]:
 #         print("-", doc.metadata)
+
 
 
 
