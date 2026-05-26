@@ -70,7 +70,8 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 chunker = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=150)
 
 # GOOGLE Config
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+# GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GOOGLE_API_KEY = st.secrets.get("GOOGLE_API_KEY") or os.environ.get("GOOGLE_API_KEY")
 GOOGLE_MODEL = "gemini-2.0-flash" 
 
 if ChatGoogleGenerativeAI is None:
