@@ -69,10 +69,6 @@ wikipedia
 youtube_transcript_api
 pytube
 
-# Heavy AI Engines (Switched to CPU-only package)
-
-paddleocr
-paddlepaddle==2.6.1
 
 # Utilities & Infrastructure
 python-dotenv
