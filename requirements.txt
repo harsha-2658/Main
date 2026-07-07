@@ -71,7 +71,6 @@ pytube
 
 # Heavy AI Engines (Switched to CPU-only package)
 
-paddlepaddle-tiny
 paddleocr
 paddlepaddle==2.6.1
 
