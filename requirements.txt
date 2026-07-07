@@ -11,7 +11,7 @@ tabulate
 fpdf
 faker
 
-# Computer Vision (Fixed)
+# Computer Vision (CPU & Headless optimized)
 opencv-python-headless
 mediapipe
 easyocr
@@ -36,7 +36,6 @@ langchain_community
 langchain_core
 langchain-text-splitters
 langchain_experimental
-langchain-experimental
 langchain_chroma
 langchain_groq
 langchain_huggingface
@@ -70,9 +69,9 @@ wikipedia
 youtube_transcript_api
 pytube
 
-# Heavy AI Engines
+# Heavy AI Engines (Switched to CPU-only package)
 paddleocr
-paddlepaddle
+paddlepaddle-tiny
 
 # Utilities & Infrastructure
 python-dotenv
